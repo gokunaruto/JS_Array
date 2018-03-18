@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>JS的一些面试题(数组篇)</title>
+</head>
+<body>
+	<script>
+		/*Question:统计一个字符串中出现最多的字符。------------------------------------------------------*/
+		var str = 'wangxiaoaiwangxiaoting';
+		var o = {};
+		for(var i = 0; i < str.length; i++) {
+			var char = str.charAt(i);
+		// console.log(char);
+			if(o[char]){     //obj.name 和 obj['name']
+				o[char]++  //如果对象有这个属性了，就给这个属性自增1
+		}else{
+				o[char] = 1  //如果对象没这个属性，就个这个属性值设为1
+			}
+		}
+		console.log(o);
+		var num = 0;
+		var number = '';
+		for (var i in o) { //for in循环 遍历对象的属性和方法
+			if(num < o[i]){
+				num = o[i];
+				number = i
+			}
+		}
+		console.log('最多出现的字符是:'+number+','+'次数是'+num)
+
+		/*数组去重的几种方法  --------------------------------------------------------------------------*/
+		var arr = [1,1,2,2,7,5,7,5,4,3,3,4,'a','c','a','b','c','b']
+		//方法一：利用对象属性的存在的特性，如果没有该属性则存入数组
+		function unique1(arr) {
+			var res = [];
+			var obj = {};
+			for(var i = 0; i<arr.length; i++){
+				if(!obj[arr[i]]){   //obj[arr[i]]为obj对象的属性值
+					obj[arr[i]] = 1;
+					res.push(arr[i])
+				}
+			}
+			return res;
+		}
+		console.log(unique1(arr));
+
+		//方法二：利用数组的indexOf
+		function unqiue2(arr) {
+			var res = [];
+			for(var i = 0; i<arr.length; i++){
+				if(res.indexOf(arr[i])==-1){  //或 arr.indexOf(arr[i])==i,即arr[i]第一次出现就push进res，再次出现就不符合条件，不再push。
+					res.push(arr[i])
+				}
+			}
+			return res;
+		}
+		console.log(unqiue2(arr));
+
+		//方法三：数组原型对象上的的includes方法
+		function unique3(arr) {
+			var res = [];
+			for(var i = 0 ;i < arr.length; i++){
+				if(!res.includes(arr[i])){
+					res.push(arr[i])
+				}
+			}
+			return res;
+		}
+		console.log(unique3(arr));
+
+		//方法四：排序后相邻去重 思路：原数组排序，排序后相同值相邻，然后遍历时新数组只传入不与前一个值相同的值
+		function unique4(arr) {
+			arr.sort();  //排序后arr已经改变了
+			var res = [arr[0]];
+			for(var i = 1; i<arr.length; i++){
+				if(arr[i] !== res[res.length-1]){
+					res.push(arr[i])
+				}
+			}
+			return res;
+		}
+		console.log(unique4(arr));
+
+		//方法五：优化遍历数组
+		function unique5(arr) {
+			var res = [];
+			for(var i = 0; i < arr.length; i++){
+				for(var j = i+1; j < arr.length; j++){
+					if(arr[i] == arr[j]){
+						 ++ i;  //与右边的元素依次比较，若有重复，则跳出内层循环，重新开始。
+						}
+					}
+					res.push(arr[i])
+				}
+				return res;
+			}
+			console.log(unique5(arr))
+
+		//方法六：ES6 Set数据结构类似于数组，其成员都是唯一的 IE系列不兼容
+		function unique6(arr) {
+			// return Array.from(new Set(arr)) ;//Array.from 将Set结构转换成数组
+			return [...(new Set(arr))]	
+		}
+		console.log(unique6(arr))
+
+		//方法七：ES6 
+		function unique7(arr) {
+			const res = new Map();
+			return arr.filter((a)=>!res.has(a)&&res.set(a,1))
+		}
+		console.log(unique7(arr));
+
+		/*数组clone(深、浅拷贝) ----------------------------------------------------------------*/
+		var arr1 = arr.concat();//方法1 concat()，深拷贝
+		var arr2 = arr.slice(0);//方法2	slice()，深拷贝
+		var arr3 = [];			//方法3	for循环,浅拷贝
+		for(var i in arr){
+			arr3[i] = arr[i]
+		}
+		/**
+		 * 深拷贝 ,如果数组里含有对象
+		 */
+		function deepClone(arr) {
+			var res = [];
+			for (var i in arr){
+				if (typeof arr[i] === 'object') { //如果含有对象，则递归
+					res[i] = deepClone(arr[i])
+				}else{
+					res[i] = arr[i]
+				}
+			}
+			return res
+		}
+		/*找出数组中的最大值  -------------------------------------------------------------*/
+		var arrMax = [1,2,3,4,5];
+		//1.for循环,古老的写法，遍历之后取最大值
+		var arrRes = arrMax[0];
+		for(var i = 1 ;i <arrMax.length; i++){
+			var result = Math.max(arrRes,arrMax[i]) 
+		}
+		console.log(result)
+		//2.Math最大值。用到apply方法，可以将数组转换成参数列表再调用Math方法
+		Math.max.apply(null,arrMax)
+		//3.sort()
+		arrMax.sort((num1,num2) => {return num2-num1})[0] //或者sort()后reverse() 
+		//4.reduce()
+		arrMax.reduce((num1,num2) => {return num1 > num2 ? num1 : num2})
+
+		/*数组降维  -------------------------------------------------------------------*/
+		var arrDown = [[1,2,3],[4,5],[9,8,7]];
+		//1.二维数组，双层遍历
+		function down(arr) {
+			var resDown = [];
+			for(var i = 0;i < arr.length; i++){
+				for (var j = 0; j < arr[i].length; j++){
+					resDown.push(arr[i][j])
+				}
+			}
+			return resDown
+		}
+		console.log(down(arrDown))
+		//2.concat()
+		function down2(arr) {
+			var resDown = [];
+			for(var i = 0; i < arr.length; i++){
+				resDown = resDown.concat(arr[i])
+			}
+			return resDown
+		}
+		console.log(down2(arrDown))
+		//3.concat()和apply()结合
+		function down3(arr) {
+			var resDown = [];
+			return Array.prototype.concat.apply(resDown,arr)
+		}
+		console.log(down3(arrDown))
+
+		/*数组排序  ---------------------------------------------------------------*/
+		//1.冒泡排序
+		var arrs = [3,2,5,9,1,6,33,4,65,22];
+		var temp = 0;
+		for(var i = 0; i < arrs.length; i++){
+			for(var j = i+1; j < arrs.length;j++){ 
+			     if(arrs[i] > arrs[j]){ //相邻比较，如果前一个大，就调换位置
+					temp = arrs[i];//temp储存前一个大的数
+					arrs[i] = arrs[j];//前一个换成小的那个数
+					arrs[j] = temp//将大的赋值给后一个
+				}
+			}
+		}
+
+		console.log(arrs)
+		//2.快速排序
+		function quickSort(arr) {
+			if(arr.length <= 1) return arr;
+			var middleIndex = Math.floor(arr.length/2);//取中间值
+			var middle = arr.splice(middleIndex,1);//删除并返回这个值，即把中间这个值拿出来用作比较
+			var left = [];
+			var right = [];
+			for(var i = 0; i < arr.length; i ++){
+				if(arr[i] > middle){  //遍历，比这个大的放在right数组，小的放在left数组
+					right.push(arr[i])
+				}else{
+					left.push(arr[i])
+				}
+			}
+			return quickSort(left).concat(middle,quickSort(right));//递归 直到length<=1
+		}
+		console.log(quickSort(arrs));
+		//3.选择排序
+			function selectSort(arr) {
+				var minIndex, temp;
+				for(var i = 0; i < arr.length-1; i++){
+					 minIndex = i;
+					for(var j = i+1; j<arr.length; j++){
+						if(arr[j] < arr[minIndex]){
+							minIndex = j
+						}
+					}
+					temp = arr[i];
+					arr[i] =arr[minIndex];
+					arr[minIndex] = temp;
+				}
+				return arr;
+			}
+			console.log(selectSort(arrs))
+	</script>
+</body>
+</html>
